@@ -8,6 +8,7 @@ import { AppSidebar } from "@/components/AppSidebar";
 import Home from "@/pages/Home";
 import Shop from "@/pages/Shop";
 import Cart from "@/pages/Cart";
+import Checkout from "@/pages/Checkout";
 import Contact from "@/pages/Contact";
 import Customers from "@/pages/Customers";
 import ProductDetail from "@/pages/ProductDetail";
@@ -20,6 +21,7 @@ function Router() {
       <Route path="/shop" component={Shop} />
       <Route path="/product/:id" component={ProductDetail} />
       <Route path="/cart" component={Cart} />
+      <Route path="/checkout" component={Checkout} />
       <Route path="/contact" component={Contact} />
       <Route path="/customers" component={Customers} />
       <Route component={NotFound} />
