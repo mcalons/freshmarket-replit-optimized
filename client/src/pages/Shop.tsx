@@ -123,21 +123,67 @@ export default function Shop() {
               </div>
             ))}
           </div>
-        ) : products.length === 0 ? (
+        ) : paginatedProducts.length === 0 ? (
           <div className="text-center py-16">
             <h3 className="text-xl font-semibold text-muted-foreground mb-2">
               No products found
             </h3>
             <p className="text-muted-foreground">
-              Try selecting a different category or check back later.
+              {searchQuery ? "Try a different search term" : "Try selecting a different category or check back later."}
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {products.map((product: any) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-6">
+              {paginatedProducts.map((product: any) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
+
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-center space-x-4 mt-12">
+                <Button
+                  variant="outline"
+                  onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                  disabled={currentPage === 1}
+                  className="flex items-center space-x-2"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                  <span>Previous</span>
+                </Button>
+
+                <div className="flex items-center space-x-2">
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                    <Button
+                      key={page}
+                      variant={currentPage === page ? "default" : "outline"}
+                      onClick={() => setCurrentPage(page)}
+                      className={`w-10 h-10 ${currentPage === page ? "bg-primary text-primary-foreground" : ""}`}
+                    >
+                      {page}
+                    </Button>
+                  ))}
+                </div>
+
+                <Button
+                  variant="outline"
+                  onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                  disabled={currentPage === totalPages}
+                  className="flex items-center space-x-2"
+                >
+                  <span>Next</span>
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
+
+            {/* Results Info */}
+            <div className="text-center text-muted-foreground mt-4">
+              Showing {startIndex + 1} to {Math.min(startIndex + ITEMS_PER_PAGE, totalProducts)} of {totalProducts} products
+              {searchQuery && ` for "${searchQuery}"`}
+            </div>
+          </>
         )}
       </div>
     </div>
