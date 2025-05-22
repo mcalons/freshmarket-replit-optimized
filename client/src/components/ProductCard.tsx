@@ -8,6 +8,7 @@ import { Link } from "wouter";
 import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { addToGuestCart } from "@/lib/guestCart";
 
 interface Product {
   id: number;
@@ -34,17 +35,21 @@ export function ProductCard({ product }: ProductCardProps) {
 
   const addToCartMutation = useMutation({
     mutationFn: async () => {
-      if (!isAuthenticated) {
-        throw new Error("Please log in to add items to cart");
+      if (isAuthenticated) {
+        return apiRequest("POST", "/api/cart", {
+          productId: product.id,
+          quantity: 1,
+        });
+      } else {
+        // Add to guest cart using localStorage
+        addToGuestCart(product, 1);
+        return Promise.resolve({} as any);
       }
-      
-      return apiRequest("POST", "/api/cart", {
-        productId: product.id,
-        quantity: 1,
-      });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
+      if (isAuthenticated) {
+        queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
+      }
       setIsAdded(true);
       toast({
         title: "Added to cart",
@@ -63,15 +68,6 @@ export function ProductCard({ product }: ProductCardProps) {
   });
 
   const handleAddToCart = () => {
-    if (!isAuthenticated) {
-      toast({
-        title: "Authentication required",
-        description: "Please log in to add items to your cart.",
-        variant: "destructive",
-      });
-      return;
-    }
-    
     addToCartMutation.mutate();
   };
 

@@ -67,13 +67,16 @@ export function AppSidebar() {
             return (
               <SidebarMenuItem key={item.name}>
                 <SidebarMenuButton asChild className={cn(
-                  "w-full flex items-center rounded-lg transition-colors",
+                  "w-full flex items-center rounded-lg transition-colors relative",
                   isCollapsed ? "justify-center px-3 py-3" : "space-x-3 px-4 py-3",
                   isActive 
                     ? "bg-primary text-primary-foreground hover:bg-primary/90" 
                     : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
                 )}>
-                  <Link href={item.href} title={isCollapsed ? item.name : undefined}>
+                  <Link href={item.href} title={isCollapsed ? item.name : undefined} className={cn(
+                    "flex items-center",
+                    isCollapsed ? "justify-center" : "space-x-3"
+                  )}>
                     <Icon className="h-5 w-5 flex-shrink-0" />
                     {!isCollapsed && <span>{item.name}</span>}
                     {!isCollapsed && item.name === "Cart" && cartCount > 0 && (

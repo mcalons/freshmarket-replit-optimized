@@ -1,12 +1,19 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { ProductCard } from "@/components/ProductCard";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Search, ChevronLeft, ChevronRight } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
+
+// Configuration - easy to modify
+const ITEMS_PER_PAGE = 4;
 
 export default function Shop() {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [currentPage, setCurrentPage] = useState<number>(1);
 
   // Initialize sample data on first visit
   useEffect(() => {
@@ -19,7 +26,7 @@ export default function Shop() {
     queryKey: ["/api/categories"],
   });
 
-  const { data: products = [], isLoading } = useQuery({
+  const { data: allProducts = [], isLoading } = useQuery({
     queryKey: ["/api/products", selectedCategory],
     queryFn: () => {
       const url = selectedCategory === "all" 
@@ -28,6 +35,28 @@ export default function Shop() {
       return fetch(url, { credentials: "include" }).then(res => res.json());
     },
   });
+
+  // Filter products based on search query
+  const filteredProducts = useMemo(() => {
+    if (!searchQuery.trim()) return allProducts;
+    
+    return allProducts.filter((product: any) =>
+      product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      product.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      product.category.name.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [allProducts, searchQuery]);
+
+  // Calculate pagination
+  const totalProducts = filteredProducts.length;
+  const totalPages = Math.ceil(totalProducts / ITEMS_PER_PAGE);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const paginatedProducts = filteredProducts.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+
+  // Reset to first page when search or category changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, selectedCategory]);
 
   const filterButtons = [
     { id: "all", name: "All Products" },
@@ -39,25 +68,40 @@ export default function Shop() {
       {/* Header */}
       <div className="bg-background shadow-sm border-b">
         <div className="container mx-auto px-8 py-6">
-          <div className="flex items-center justify-between flex-wrap gap-4">
-            <div>
-              <h1 className="text-3xl font-bold text-foreground">Shop Fresh Produce</h1>
-              <p className="text-muted-foreground mt-2">
-                Discover our selection of premium organic fruits and vegetables
-              </p>
+          <div className="space-y-6">
+            <div className="flex items-center justify-between flex-wrap gap-4">
+              <div>
+                <h1 className="text-3xl font-bold text-foreground">Shop Fresh Produce</h1>
+                <p className="text-muted-foreground mt-2">
+                  Discover our selection of premium organic fruits and vegetables
+                </p>
+              </div>
             </div>
-            
-            <div className="flex flex-wrap gap-4">
-              {filterButtons.map((filter) => (
-                <Button
-                  key={filter.id}
-                  variant={selectedCategory === filter.id ? "default" : "outline"}
-                  onClick={() => setSelectedCategory(filter.id)}
-                  className={selectedCategory === filter.id ? "bg-primary text-primary-foreground" : ""}
-                >
-                  {filter.name}
-                </Button>
-              ))}
+
+            {/* Search Bar */}
+            <div className="flex items-center space-x-4">
+              <div className="relative flex-1 max-w-md">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                <Input
+                  placeholder="Search products..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+              
+              <div className="flex flex-wrap gap-2">
+                {filterButtons.map((filter) => (
+                  <Button
+                    key={filter.id}
+                    variant={selectedCategory === filter.id ? "default" : "outline"}
+                    onClick={() => setSelectedCategory(filter.id)}
+                    className={selectedCategory === filter.id ? "bg-primary text-primary-foreground" : ""}
+                  >
+                    {filter.name}
+                  </Button>
+                ))}
+              </div>
             </div>
           </div>
         </div>
