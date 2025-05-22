@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -57,20 +58,36 @@ export default function Checkout() {
   const { toast } = useToast();
   const [, setLocation] = useLocation();
 
-  // Get cart items
-  const cartItems = isAuthenticated ? [] : getGuestCart(); // For now, simplified
-  const subtotal = calculateCartTotal(cartItems, isAuthenticated);
-  const discount = isAuthenticated ? subtotal * 0.05 : discountAmount;
-  const shipping = isAuthenticated && subtotal >= 60 ? 0 : 5.99;
-  const total = subtotal - discount + shipping;
+  // Get cart items from either authenticated user or guest cart
+  const { data: authCartItems = [] } = useQuery({
+    queryKey: ["/api/cart"],
+    enabled: isAuthenticated,
+  });
+
+  const [guestCartItems, setGuestCartItems] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setGuestCartItems(getGuestCart());
+    }
+  }, [isAuthenticated]);
+
+  const cartItems = isAuthenticated ? (authCartItems as any[]) : guestCartItems;
+  const cartTotals = calculateCartTotal(cartItems || [], isAuthenticated);
+  
+  // Extract numeric values from the cart totals object
+  const subtotal = parseFloat(cartTotals.subtotal || "0");
+  const discount = parseFloat(cartTotals.discount || "0");
+  const shipping = parseFloat(cartTotals.delivery || "0");
+  const total = parseFloat(cartTotals.total || "0");
 
   // Step 1: User Information Form
   const userInfoForm = useForm<UserInfoForm>({
     resolver: zodResolver(userInfoSchema),
     defaultValues: {
-      firstName: user?.firstName || "",
-      lastName: user?.lastName || "",
-      email: user?.email || "",
+      firstName: (user as any)?.firstName || "",
+      lastName: (user as any)?.lastName || "",
+      email: (user as any)?.email || "",
       phone: "",
     },
   });
@@ -104,7 +121,7 @@ export default function Checkout() {
   };
 
   const handlePaymentSubmit = (data: PaymentForm) => {
-    // Process the order
+    // Simulate order processing
     toast({
       title: "Order placed successfully!",
       description: "Thank you for your purchase. You will receive a confirmation email shortly.",
@@ -135,7 +152,7 @@ export default function Checkout() {
     }
   };
 
-  if (cartItems.length === 0) {
+  if (!cartItems || cartItems.length === 0) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Card className="w-full max-w-md">
@@ -533,7 +550,7 @@ export default function Checkout() {
               <CardContent className="space-y-4">
                 {/* Cart Items */}
                 <div className="space-y-3">
-                  {cartItems.slice(0, 3).map((item: any) => (
+                  {(cartItems || []).slice(0, 3).map((item: any) => (
                     <div key={item.id} className="flex items-center space-x-3">
                       <img 
                         src={item.product?.imageUrl} 
@@ -548,7 +565,7 @@ export default function Checkout() {
                       </div>
                     </div>
                   ))}
-                  {cartItems.length > 3 && (
+                  {cartItems && cartItems.length > 3 && (
                     <p className="text-sm text-muted-foreground">
                       +{cartItems.length - 3} more items
                     </p>
