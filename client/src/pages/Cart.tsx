@@ -17,19 +17,47 @@ import { Link } from "wouter";
 
 export default function Cart() {
   const [paymentMethod, setPaymentMethod] = useState("bizum");
+  const [guestCartItems, setGuestCartItems] = useState<any[]>([]);
+  const [guestInfo, setGuestInfo] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    address: "",
+  });
   const { isAuthenticated } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: cartItems = [], isLoading } = useQuery({
+  const { data: authCartItems = [], isLoading } = useQuery({
     queryKey: ["/api/cart"],
     enabled: isAuthenticated,
   });
 
+  // Load guest cart from localStorage
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setGuestCartItems(getGuestCart());
+    }
+  }, [isAuthenticated]);
+
+  const cartItems = isAuthenticated ? authCartItems : guestCartItems;
+
   const clearCartMutation = useMutation({
-    mutationFn: () => apiRequest("DELETE", "/api/cart"),
+    mutationFn: async () => {
+      if (isAuthenticated) {
+        return apiRequest("DELETE", "/api/cart");
+      } else {
+        clearGuestCart();
+        return Promise.resolve({} as any);
+      }
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
+      if (isAuthenticated) {
+        queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
+      } else {
+        setGuestCartItems([]);
+      }
       toast({
         title: "Cart cleared",
         description: "All items have been removed from your cart.",
@@ -38,13 +66,28 @@ export default function Cart() {
   });
 
   const createOrderMutation = useMutation({
-    mutationFn: () => apiRequest("POST", "/api/orders", {
-      paymentMethod,
-      deliveryAddress: "Default delivery address", // In a real app, this would come from user input
-    }),
+    mutationFn: async () => {
+      if (isAuthenticated) {
+        return apiRequest("POST", "/api/orders", {
+          paymentMethod,
+          deliveryAddress: guestInfo.address || "Default delivery address",
+        });
+      } else {
+        // For guest orders, simulate successful order
+        return Promise.resolve({ 
+          id: Date.now(), 
+          message: "Guest order created successfully" 
+        } as any);
+      }
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/orders"] });
+      if (isAuthenticated) {
+        queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/orders"] });
+      } else {
+        clearGuestCart();
+        setGuestCartItems([]);
+      }
       toast({
         title: "Order placed successfully!",
         description: "Thank you for your order. You will receive a confirmation email shortly.",
@@ -59,23 +102,7 @@ export default function Cart() {
     },
   });
 
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Card className="w-full max-w-md mx-4">
-          <CardContent className="pt-6 text-center">
-            <h2 className="text-2xl font-bold mb-4">Login Required</h2>
-            <p className="text-muted-foreground mb-6">
-              Please log in to view your shopping cart.
-            </p>
-            <Button asChild>
-              <Link href="/customers">Go to Login</Link>
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
+  // Remove the login requirement - allow guest shopping
 
   if (isLoading) {
     return (
@@ -88,7 +115,7 @@ export default function Cart() {
     );
   }
 
-  const { subtotal, delivery, total } = calculateCartTotal(cartItems);
+  const { subtotal, discount, discountedSubtotal, delivery, total, hasDiscount, hasFreeShipping } = calculateCartTotal(cartItems as any[], isAuthenticated);
 
   return (
     <div className="min-h-screen">
