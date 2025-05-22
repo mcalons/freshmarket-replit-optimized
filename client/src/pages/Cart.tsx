@@ -182,36 +182,16 @@ export default function Cart() {
                     </div>
                   </div>
 
-                  {/* Payment Method */}
-                  <div className="space-y-4">
-                    <h3 className="font-semibold">Payment Method</h3>
-                    <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod}>
-                      <div className="flex items-center space-x-3 p-3 border border-border rounded-lg cursor-pointer hover:bg-accent">
-                        <RadioGroupItem value="bizum" id="bizum" />
-                        <Label htmlFor="bizum" className="flex items-center space-x-2 cursor-pointer">
-                          <Smartphone className="h-4 w-4 text-orange-500" />
-                          <span>Bizum</span>
-                        </Label>
-                      </div>
-                      <div className="flex items-center space-x-3 p-3 border border-border rounded-lg cursor-pointer hover:bg-accent">
-                        <RadioGroupItem value="card" id="card" />
-                        <Label htmlFor="card" className="flex items-center space-x-2 cursor-pointer">
-                          <CreditCard className="h-4 w-4 text-primary" />
-                          <span>Credit Card</span>
-                        </Label>
-                      </div>
-                    </RadioGroup>
-                  </div>
-
                   {/* Actions */}
                   <div className="space-y-3">
                     <Button 
-                      className="w-full bg-primary hover:bg-primary/90"
-                      onClick={() => createOrderMutation.mutate()}
-                      disabled={createOrderMutation.isPending}
+                      className="w-full bg-green-600 hover:bg-green-700 text-white"
+                      asChild
                     >
-                      <Lock className="w-4 h-4 mr-2" />
-                      {createOrderMutation.isPending ? "Processing..." : "Proceed to Checkout"}
+                      <Link href="/checkout">
+                        <Lock className="w-4 h-4 mr-2" />
+                        Proceed to Checkout
+                      </Link>
                     </Button>
 
                     <Button 
