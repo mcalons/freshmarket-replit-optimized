@@ -1,14 +1,16 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import { Input } from "@/components/ui/input";
 import { CartItem } from "@/components/CartItem";
-import { Lock, Trash2, CreditCard, Smartphone } from "lucide-react";
+import { Lock, Trash2, CreditCard, Smartphone, User, Gift, Truck, Star } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { calculateCartTotal } from "@/lib/cart";
+import { getGuestCart, clearGuestCart } from "@/lib/guestCart";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "wouter";

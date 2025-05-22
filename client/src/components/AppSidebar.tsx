@@ -9,6 +9,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import { Badge } from "@/components/ui/badge";
 import { 
@@ -30,6 +31,7 @@ const navigation = [
 
 export function AppSidebar() {
   const [location] = useLocation();
+  const { state } = useSidebar();
 
   // Get cart count
   const { data: cartItems = [] } = useQuery({
@@ -38,18 +40,21 @@ export function AppSidebar() {
   });
 
   const cartCount = cartItems.reduce((sum: number, item: any) => sum + item.quantity, 0);
+  const isCollapsed = state === "collapsed";
 
   return (
     <Sidebar className="border-r border-border/40">
-      <SidebarHeader className="p-6 border-b border-border/40">
-        <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
+      <SidebarHeader className={cn("border-b border-border/40", isCollapsed ? "p-4" : "p-6")}>
+        <div className={cn("flex items-center", isCollapsed ? "justify-center" : "space-x-3")}>
+          <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center flex-shrink-0">
             <Leaf className="text-primary-foreground text-lg" />
           </div>
-          <div>
-            <h1 className="text-xl font-bold text-foreground">FreshMarket</h1>
-            <p className="text-sm text-muted-foreground">Organic Food Store</p>
-          </div>
+          {!isCollapsed && (
+            <div>
+              <h1 className="text-xl font-bold text-foreground">FreshMarket</h1>
+              <p className="text-sm text-muted-foreground">Organic Food Store</p>
+            </div>
+          )}
         </div>
       </SidebarHeader>
       
@@ -62,17 +67,23 @@ export function AppSidebar() {
             return (
               <SidebarMenuItem key={item.name}>
                 <SidebarMenuButton asChild className={cn(
-                  "w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors",
+                  "w-full flex items-center rounded-lg transition-colors",
+                  isCollapsed ? "justify-center px-3 py-3" : "space-x-3 px-4 py-3",
                   isActive 
                     ? "bg-primary text-primary-foreground hover:bg-primary/90" 
                     : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
                 )}>
-                  <Link href={item.href}>
-                    <Icon className="h-5 w-5" />
-                    <span>{item.name}</span>
-                    {item.name === "Cart" && cartCount > 0 && (
+                  <Link href={item.href} title={isCollapsed ? item.name : undefined}>
+                    <Icon className="h-5 w-5 flex-shrink-0" />
+                    {!isCollapsed && <span>{item.name}</span>}
+                    {!isCollapsed && item.name === "Cart" && cartCount > 0 && (
                       <Badge variant="secondary" className="ml-auto bg-orange-500 text-white text-xs">
                         {cartCount}
+                      </Badge>
+                    )}
+                    {isCollapsed && item.name === "Cart" && cartCount > 0 && (
+                      <Badge variant="secondary" className="absolute -top-1 -right-1 bg-orange-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center p-0">
+                        {cartCount > 9 ? "9+" : cartCount}
                       </Badge>
                     )}
                   </Link>

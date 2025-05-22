@@ -10,6 +10,7 @@ import Shop from "@/pages/Shop";
 import Cart from "@/pages/Cart";
 import Contact from "@/pages/Contact";
 import Customers from "@/pages/Customers";
+import ProductDetail from "@/pages/ProductDetail";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -17,6 +18,7 @@ function Router() {
     <Switch>
       <Route path="/" component={Home} />
       <Route path="/shop" component={Shop} />
+      <Route path="/product/:id" component={ProductDetail} />
       <Route path="/cart" component={Cart} />
       <Route path="/contact" component={Contact} />
       <Route path="/customers" component={Customers} />

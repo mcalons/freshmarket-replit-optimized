@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Check } from "lucide-react";
+import { Link } from "wouter";
 import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -76,23 +77,27 @@ export function ProductCard({ product }: ProductCardProps) {
 
   return (
     <Card className="group overflow-hidden hover:shadow-xl transition-shadow duration-300">
-      <div className="relative overflow-hidden">
-        <img 
-          src={product.imageUrl} 
-          alt={product.name}
-          className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
-        />
-        {product.isOrganic && (
-          <Badge className="absolute top-3 right-3 bg-primary text-primary-foreground">
-            Organic
-          </Badge>
-        )}
-      </div>
+      <Link href={`/product/${product.id}`}>
+        <div className="relative overflow-hidden cursor-pointer">
+          <img 
+            src={product.imageUrl} 
+            alt={product.name}
+            className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+          />
+          {product.isOrganic && (
+            <Badge className="absolute top-3 right-3 bg-primary text-primary-foreground">
+              Organic
+            </Badge>
+          )}
+        </div>
+      </Link>
       
       <CardContent className="p-4">
-        <h3 className="text-lg font-semibold text-foreground mb-2">
-          {product.name}
-        </h3>
+        <Link href={`/product/${product.id}`}>
+          <h3 className="text-lg font-semibold text-foreground mb-2 hover:text-primary transition-colors cursor-pointer">
+            {product.name}
+          </h3>
+        </Link>
         <p className="text-muted-foreground text-sm mb-3 line-clamp-2">
           {product.description}
         </p>
