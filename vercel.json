@@ -1,0 +1,86 @@
+{
+  "version": 2,
+  "regions": ["fra1"],
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "client/dist/public"
+      }
+    },
+    {
+      "src": "server/index.ts",
+      "use": "@vercel/node",
+      "config": {
+        "includeFiles": [
+          "dist/server/**", 
+          "shared/**",      
+          "node_modules/@neondatabase/serverless/**",
+          "node_modules/connect-pg-simple/**",
+          "node_modules/drizzle-orm/**",
+          "node_modules/drizzle-zod/**",
+          "node_modules/express/**",
+          "node_modules/express-session/**",
+          "node_modules/memoizee/**",
+          "node_modules/memorystore/**",
+          "node_modules/openid-client/**",
+          "node_modules/passport/**",
+          "node_modules/passport-local/**",
+          "node_modules/ws/**",
+          "node_modules/zod/**", 
+          "node_modules/zod-validation-error/**",
+          "node_modules/bufferutil/**" 
+        ],
+        "excludeFiles": [
+          "node_modules/@radix-ui/**",
+          "node_modules/react/**",
+          "node_modules/react-dom/**",
+          "node_modules/lucide-react/**",
+          "node_modules/@tanstack/**",
+          "node_modules/wouter/**",
+          "**/*.log",
+          "**/*.git",
+          "**/*.env",
+          "**/*.md",
+          "**/*.test.js",
+          "**/*.spec.js",
+          "**/*.snap",
+          "**/*.d.ts",      
+          "*.lock",
+          "*.yml",
+          "*.yaml",
+          "*.toml",
+          "*.local",
+          "*.map",        
+          "**/docs/**",
+          "**/examples/**",
+          "**/test/**",
+          "**/_test/**",
+          "**/.bin/**",
+          "**/dist-esnext/**", 
+          "**/dist-legacy/**",
+          "**/esm/**",
+          "**/typings/**",
+          "**/coverage/**"
+        ]
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "server/index.ts"
+    },
+    {
+      "src": "/(.*\\.[^/]*)$", 
+      "dest": "client/dist/public/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "client/dist/public/index.html"
+    }
+  ],
+  "installCommand": "npm install",
+  "buildCommand": "npm run build:frontend && npm run build:backend"
+}
