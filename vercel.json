@@ -82,6 +82,5 @@
     }
   ],
   "installCommand": "npm install",
-  "buildCommand": "npm run build:frontend && npm run build:backend",
-  "outputDirectory": "dist/public"
+  "buildCommand": "npm run build:frontend && npm run build:backend"
 }
