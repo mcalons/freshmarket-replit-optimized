@@ -14,6 +14,22 @@ import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 import { relations } from "drizzle-orm";
 
+// Utility types for safe ID handling
+export type UserId = string; // Replit Auth requires string IDs
+export type NumericId = number; // For all other entities
+
+// Safe ID conversion utilities
+export const parseUserId = (id: string | number | undefined): UserId | null => {
+  if (id === undefined || id === null) return null;
+  return String(id);
+};
+
+export const parseNumericId = (id: string | number | undefined): NumericId | null => {
+  if (id === undefined || id === null) return null;
+  const parsed = typeof id === 'string' ? parseInt(id, 10) : id;
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : null;
+};
+
 // Session storage table (required for Replit Auth)
 export const sessions = pgTable(
   "sessions",

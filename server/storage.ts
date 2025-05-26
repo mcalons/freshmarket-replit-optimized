@@ -20,13 +20,17 @@ import {
   type InsertOrder,
   type InsertOrderItem,
   type InsertContactMessage,
+  type UserId,
+  type NumericId,
+  parseUserId,
+  parseNumericId,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc } from "drizzle-orm";
 
 export interface IStorage {
   // User operations (required for Replit Auth)
-  getUser(id: string): Promise<User | undefined>;
+  getUser(id: UserId): Promise<User | null>;
   upsertUser(user: UpsertUser): Promise<User>;
 
   // Category operations
@@ -35,21 +39,21 @@ export interface IStorage {
 
   // Product operations
   getProducts(): Promise<(Product & { category: Category })[]>;
-  getProductsByCategory(categoryId: number): Promise<(Product & { category: Category })[]>;
-  getProduct(id: number): Promise<(Product & { category: Category }) | undefined>;
+  getProductsByCategory(categoryId: NumericId): Promise<(Product & { category: Category })[]>;
+  getProduct(id: NumericId): Promise<(Product & { category: Category }) | null>;
   createProduct(product: InsertProduct): Promise<Product>;
 
   // Cart operations
-  getCartItems(userId: string): Promise<(CartItem & { product: Product & { category: Category } })[]>;
+  getCartItems(userId: UserId): Promise<(CartItem & { product: Product & { category: Category } })[]>;
   addToCart(cartItem: InsertCartItem): Promise<CartItem>;
-  updateCartItem(id: number, quantity: number): Promise<CartItem | undefined>;
-  removeFromCart(id: number): Promise<void>;
-  clearCart(userId: string): Promise<void>;
+  updateCartItem(id: NumericId, quantity: number): Promise<CartItem | null>;
+  removeFromCart(id: NumericId): Promise<void>;
+  clearCart(userId: UserId): Promise<void>;
 
   // Order operations
   createOrder(order: InsertOrder, items: InsertOrderItem[]): Promise<Order>;
-  getUserOrders(userId: string): Promise<(Order & { orderItems: (OrderItem & { product: Product })[] })[]>;
-  getOrder(id: number): Promise<(Order & { orderItems: (OrderItem & { product: Product })[] }) | undefined>;
+  getUserOrders(userId: UserId): Promise<(Order & { orderItems: (OrderItem & { product: Product })[] })[]>;
+  getOrder(id: NumericId): Promise<(Order & { orderItems: (OrderItem & { product: Product })[] }) | null>;
 
   // Contact operations
   createContactMessage(message: InsertContactMessage): Promise<ContactMessage>;
