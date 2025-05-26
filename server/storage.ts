@@ -61,9 +61,12 @@ export interface IStorage {
 
 export class DatabaseStorage implements IStorage {
   // User operations (required for Replit Auth)
-  async getUser(id: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.id, id));
-    return user;
+  async getUser(id: UserId): Promise<User | null> {
+    const validId = parseUserId(id);
+    if (!validId) return null;
+    
+    const [user] = await db.select().from(users).where(eq(users.id, validId));
+    return user || null;
   }
 
   async upsertUser(userData: UpsertUser): Promise<User> {
@@ -78,6 +81,10 @@ export class DatabaseStorage implements IStorage {
         },
       })
       .returning();
+    
+    if (!user) {
+      throw new Error('Failed to upsert user');
+    }
     return user;
   }
 
@@ -105,12 +112,15 @@ export class DatabaseStorage implements IStorage {
       );
   }
 
-  async getProductsByCategory(categoryId: number): Promise<(Product & { category: Category })[]> {
+  async getProductsByCategory(categoryId: NumericId): Promise<(Product & { category: Category })[]> {
+    const validId = parseNumericId(categoryId);
+    if (!validId) return [];
+    
     return await db
       .select()
       .from(products)
       .leftJoin(categories, eq(products.categoryId, categories.id))
-      .where(eq(products.categoryId, categoryId))
+      .where(eq(products.categoryId, validId))
       .then(rows => 
         rows.map(row => ({
           ...row.products,
@@ -119,14 +129,17 @@ export class DatabaseStorage implements IStorage {
       );
   }
 
-  async getProduct(id: number): Promise<(Product & { category: Category }) | undefined> {
+  async getProduct(id: NumericId): Promise<(Product & { category: Category }) | null> {
+    const validId = parseNumericId(id);
+    if (!validId) return null;
+    
     const [result] = await db
       .select()
       .from(products)
       .leftJoin(categories, eq(products.categoryId, categories.id))
-      .where(eq(products.id, id));
+      .where(eq(products.id, validId));
     
-    if (!result) return undefined;
+    if (!result) return null;
     
     return {
       ...result.products,
@@ -140,13 +153,16 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Cart operations
-  async getCartItems(userId: string): Promise<(CartItem & { product: Product & { category: Category } })[]> {
+  async getCartItems(userId: UserId): Promise<(CartItem & { product: Product & { category: Category } })[]> {
+    const validUserId = parseUserId(userId);
+    if (!validUserId) return [];
+    
     return await db
       .select()
       .from(cartItems)
       .leftJoin(products, eq(cartItems.productId, products.id))
       .leftJoin(categories, eq(products.categoryId, categories.id))
-      .where(eq(cartItems.userId, userId))
+      .where(eq(cartItems.userId, validUserId))
       .then(rows =>
         rows.map(row => ({
           ...row.cart_items,
@@ -171,15 +187,22 @@ export class DatabaseStorage implements IStorage {
       );
 
     if (existingItem) {
-      // Update quantity
+      // Update quantity - handle potential undefined values safely
+      const currentQuantity = existingItem.quantity ?? 0;
+      const addQuantity = cartItem.quantity;
+      
       const [updatedItem] = await db
         .update(cartItems)
         .set({
-          quantity: existingItem.quantity + cartItem.quantity,
+          quantity: currentQuantity + addQuantity,
           updatedAt: new Date(),
         })
         .where(eq(cartItems.id, existingItem.id))
         .returning();
+      
+      if (!updatedItem) {
+        throw new Error('Failed to update cart item');
+      }
       return updatedItem;
     } else {
       // Create new cart item
