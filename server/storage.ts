@@ -211,21 +211,30 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  async updateCartItem(id: number, quantity: number): Promise<CartItem | undefined> {
+  async updateCartItem(id: NumericId, quantity: number): Promise<CartItem | null> {
+    const validId = parseNumericId(id);
+    if (!validId) return null;
+    
     const [updatedItem] = await db
       .update(cartItems)
       .set({ quantity, updatedAt: new Date() })
-      .where(eq(cartItems.id, id))
+      .where(eq(cartItems.id, validId))
       .returning();
-    return updatedItem;
+    return updatedItem || null;
   }
 
-  async removeFromCart(id: number): Promise<void> {
-    await db.delete(cartItems).where(eq(cartItems.id, id));
+  async removeFromCart(id: NumericId): Promise<void> {
+    const validId = parseNumericId(id);
+    if (!validId) return;
+    
+    await db.delete(cartItems).where(eq(cartItems.id, validId));
   }
 
-  async clearCart(userId: string): Promise<void> {
-    await db.delete(cartItems).where(eq(cartItems.userId, userId));
+  async clearCart(userId: UserId): Promise<void> {
+    const validUserId = parseUserId(userId);
+    if (!validUserId) return;
+    
+    await db.delete(cartItems).where(eq(cartItems.userId, validUserId));
   }
 
   // Order operations
