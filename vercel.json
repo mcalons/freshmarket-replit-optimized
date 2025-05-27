@@ -13,25 +13,7 @@
       "src": "server/index.ts",
       "use": "@vercel/node",
       "config": {
-        "includeFiles": [
-          "dist/server/**",
-          "shared/**",
-          "node_modules/@neondatabase/serverless/**",
-          "node_modules/connect-pg-simple/**",
-          "node_modules/drizzle-orm/**",
-          "node_modules/drizzle-zod/**",
-          "node_modules/express/**",
-          "node_modules/express-session/**",
-          "node_modules/memoizee/**",
-          "node_modules/memorystore/**",
-          "node_modules/openid-client/**",
-          "node_modules/passport/**",
-          "node_modules/passport-local/**",
-          "node_modules/ws/**",
-          "node_modules/zod/**",
-          "node_modules/zod-validation-error/**",
-          "node_modules/bufferutil/**"
-        ],
+        "includeFiles": ["server/**/*.ts", "shared/**"],
         "excludeFiles": [
           "node_modules/@radix-ui/**",
           "node_modules/react/**",
@@ -82,5 +64,5 @@
     }
   ],
   "installCommand": "npm install",
-  "buildCommand": "npm run build:frontend && npm run build:backend"
+  "buildCommand": "npm run build:frontend"
 }
