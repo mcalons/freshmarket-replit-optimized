@@ -21,6 +21,7 @@ import {
   type InsertCartItem,
   type InsertOrder,
   type InsertOrderItem,
+  type InsertContactMessage,
   type UserId,
   type NumericId,
   parseUserId,
@@ -215,7 +216,9 @@ export class DatabaseStorage implements IStorage {
     if (existingItem) {
       // Update quantity - handle potential undefined values safely
       const currentQuantity = existingItem.quantity ?? 0;
-      const addQuantity = cartItem.quantity; // `cartItem.quantity` siempre será un número por Zod
+      // Aseguramos que `addQuantity` es un número, por si acaso `cartItem.quantity`
+      // es opcional o puede ser `undefined` en el tipo `InsertCartItem`.
+      const addQuantity = cartItem.quantity ?? 0; // <--- CORRECCIÓN AQUÍ
 
       const [updatedItem] = await db
         .update(cartItems)

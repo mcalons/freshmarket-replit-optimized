@@ -24,9 +24,11 @@ export const parseUserId = (id: string | number | undefined): UserId | null => {
   return String(id);
 };
 
-export const parseNumericId = (id: string | number | undefined): NumericId | null => {
+export const parseNumericId = (
+  id: string | number | undefined,
+): NumericId | null => {
   if (id === undefined || id === null) return null;
-  const parsed = typeof id === 'string' ? parseInt(id, 10) : id;
+  const parsed = typeof id === "string" ? parseInt(id, 10) : id;
   return Number.isInteger(parsed) && parsed > 0 ? parsed : null;
 };
 
@@ -58,6 +60,7 @@ export const categories = pgTable("categories", {
   name: varchar("name", { length: 100 }).notNull(),
   slug: varchar("slug", { length: 100 }).notNull().unique(),
   createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
 // Products
@@ -68,17 +71,24 @@ export const products = pgTable("products", {
   price: decimal("price", { precision: 10, scale: 2 }).notNull(),
   unit: varchar("unit", { length: 20 }).notNull().default("kg"),
   imageUrl: text("image_url"),
-  categoryId: integer("category_id").references(() => categories.id).notNull(),
+  categoryId: integer("category_id")
+    .references(() => categories.id)
+    .notNull(),
   isOrganic: boolean("is_organic").default(true),
   inStock: boolean("in_stock").default(true),
   createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 // Shopping cart items
 export const cartItems = pgTable("cart_items", {
   id: serial("id").primaryKey(),
-  userId: varchar("user_id").references(() => users.id).notNull(),
-  productId: integer("product_id").references(() => products.id).notNull(),
+  userId: varchar("user_id")
+    .references(() => users.id)
+    .notNull(),
+  productId: integer("product_id")
+    .references(() => products.id)
+    .notNull(),
   quantity: integer("quantity").notNull().default(1),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -87,7 +97,9 @@ export const cartItems = pgTable("cart_items", {
 // Orders
 export const orders = pgTable("orders", {
   id: serial("id").primaryKey(),
-  userId: varchar("user_id").references(() => users.id).notNull(),
+  userId: varchar("user_id")
+    .references(() => users.id)
+    .notNull(),
   status: varchar("status", { length: 50 }).notNull().default("pending"),
   total: decimal("total", { precision: 10, scale: 2 }).notNull(),
   paymentMethod: varchar("payment_method", { length: 50 }),
@@ -99,11 +111,16 @@ export const orders = pgTable("orders", {
 // Order items
 export const orderItems = pgTable("order_items", {
   id: serial("id").primaryKey(),
-  orderId: integer("order_id").references(() => orders.id).notNull(),
-  productId: integer("product_id").references(() => products.id).notNull(),
+  orderId: integer("order_id")
+    .references(() => orders.id)
+    .notNull(),
+  productId: integer("product_id")
+    .references(() => products.id)
+    .notNull(),
   quantity: integer("quantity").notNull(),
   price: decimal("price", { precision: 10, scale: 2 }).notNull(),
   createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 // Contact messages
@@ -115,6 +132,7 @@ export const contactMessages = pgTable("contact_messages", {
   subject: varchar("subject", { length: 200 }).notNull(),
   message: text("message").notNull(),
   createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 // Relations
@@ -216,7 +234,9 @@ export const insertOrderItemSchema = createInsertSchema(orderItems).omit({
   createdAt: true,
 });
 
-export const insertContactMessageSchema = createInsertSchema(contactMessages).omit({
+export const insertContactMessageSchema = createInsertSchema(
+  contactMessages,
+).omit({
   id: true,
   createdAt: true,
 });
