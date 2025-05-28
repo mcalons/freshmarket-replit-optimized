@@ -1,8 +1,8 @@
 // server/routes.ts
 import type { Express } from "express";
 import { createServer, type Server } from "http";
-import { storage } from "./storage"; // Asegúrate de que este import sea correcto
-import { setupAuth, isAuthenticated } from "./replitAuth";
+import { storage } from "./storage.js"; // Asegúrate de que este import sea correcto
+import { setupAuth, isAuthenticated } from "./replitAuth.js";
 import {
   insertContactMessageSchema,
   insertCartItemSchema,
