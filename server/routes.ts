@@ -6,7 +6,8 @@ import { setupAuth, isAuthenticated } from "./replitAuth.js";
 import {
   insertContactMessageSchema,
   insertCartItemSchema,
-} from "@shared/schema";
+} from "../shared/schema.js"; // <-- MODIFICAR AQUÍ
+//from "@shared/schema";
 import { z } from "zod";
 
 // Importa el nuevo tipo si es necesario, o usa Omit<InsertOrderItem, 'orderId'> directamente
