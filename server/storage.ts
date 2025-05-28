@@ -27,7 +27,7 @@ import {
   parseUserId,
   parseNumericId,
 } from "@shared/schema";
-import { db } from "./db";
+import { db } from "./db.js";
 import { eq, and, desc } from "drizzle-orm";
 
 // Nuevo tipo para los ítems de la orden antes de que se les asigne el orderId.
