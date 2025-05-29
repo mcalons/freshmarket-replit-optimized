@@ -1,31 +1,17 @@
 // server/routes.ts
 import type { Express } from "express";
 import { createServer, type Server } from "http";
-import { storage } from "./storage.js"; // Asegúrate de que este import sea correcto
-// import { setupAuth, isAuthenticated } from "./replitAuth.js"; // ¡ELIMINAR O COMENTAR ESTA LÍNEA!
+import { storage } from "./storage.js";
 import {
   insertContactMessageSchema,
   insertCartItemSchema,
 } from "../shared/schema.js";
 import { z } from "zod";
 
-// Importa el nuevo tipo si es necesario, o usa Omit<InsertOrderItem, 'orderId'> directamente
-// Si `storage.ts` exporta `TemporaryOrderItem`, impórtalo:
-// import { type TemporaryOrderItem } from "./storage"; // <-- Descomenta si exportas TemporaryOrderItem
-
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Auth middleware - ¡ELIMINAR ESTA LLAMADA!
-  // await setupAuth(app);
-
-  // Auth routes - Estas rutas ya no usarán isAuthenticated, o deberías eliminarlas si no tienes otro sistema de auth
-  app.get("/api/auth/user", async (req: any, res) => { // Eliminado isAuthenticated
-    // Si ya no usas autenticación de Replit, `req.user` será undefined.
-    // Esta ruta necesitará una nueva lógica de autenticación o ser eliminada.
+  app.get("/api/auth/user", async (req: any, res) => {
     try {
-      // **IMPORTANTE:** `req.user` ya no será poblado por Replit Auth.
-      // Si necesitas datos de usuario, deberás integrar una nueva estrategia de autenticación.
-      // Por ahora, esta ruta puede devolver un error o datos de prueba si no hay autenticación.
-      res.status(401).json({ message: "Authentication required" }); // O ajusta según tu necesidad
+      res.status(401).json({ message: "Authentication required" });
     } catch (error) {
       console.error("Error fetching user:", error);
       res.status(500).json({ message: "Failed to fetch user" });
@@ -87,11 +73,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Cart routes (YA NO PROTEGIDAS POR isAuthenticated A MENOS QUE AÑADAS OTRO MIDDLEWARE)
-  app.get("/api/cart", async (req: any, res) => { // Eliminado isAuthenticated
+  app.get("/api/cart", async (req: any, res) => {
     try {
-      // Si ya no hay autenticación, `req.user` será undefined.
-      // Necesitarás una nueva forma de identificar al usuario (ej. token, ID de sesión)
-      // O hacer que estas rutas no requieran un usuario logueado.
       res.status(401).json({ message: "Authentication required for cart operations" });
     } catch (error) {
       console.error("Error fetching cart:", error);
@@ -99,7 +82,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/cart", async (req: any, res) => { // Eliminado isAuthenticated
+  app.post("/api/cart", async (req: any, res) => {
     try {
       res.status(401).json({ message: "Authentication required to add to cart" });
     } catch (error) {
@@ -113,31 +96,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/cart/:id", async (req: any, res) => { // Eliminado isAuthenticated
+  // CORRECCIÓN: Definición de id y quantity, y mover validación al try
+  app.put("/api/cart/:id", async (req: any, res) => {
     try {
-      res.status(401).json({ message: "Authentication required to update cart" });
-    } catch (error) {
+      // Extrae y define id y quantity aquí
+      const id = parseInt(req.params.id);
+      const quantity = req.body.quantity; // Asumiendo que quantity viene en el body
+
+      // Mueve la validación aquí
       if (isNaN(id) || typeof quantity !== "number" || quantity < 1) {
         return res.status(400).json({ message: "Invalid data" });
       }
+
+      res.status(401).json({ message: "Authentication required to update cart" });
+    } catch (error) {
       console.error("Error updating cart item:", error);
       res.status(500).json({ message: "Failed to update cart item" });
     }
   });
 
-  app.delete("/api/cart/:id", async (req: any, res) => { // Eliminado isAuthenticated
+  // CORRECCIÓN: Definición de id y mover validación al try
+  app.delete("/api/cart/:id", async (req: any, res) => {
     try {
-      res.status(401).json({ message: "Authentication required to remove from cart" });
-    } catch (error) {
+      // Extrae y define id aquí
+      const id = parseInt(req.params.id);
+
+      // Mueve la validación aquí
       if (isNaN(id)) {
         return res.status(400).json({ message: "Invalid cart item ID" });
       }
+
+      res.status(401).json({ message: "Authentication required to remove from cart" });
+    } catch (error) {
       console.error("Error removing from cart:", error);
       res.status(500).json({ message: "Failed to remove item from cart" });
     }
   });
 
-  app.delete("/api/cart", async (req: any, res) => { // Eliminado isAuthenticated
+  app.delete("/api/cart", async (req: any, res) => {
     try {
       res.status(401).json({ message: "Authentication required to clear cart" });
     } catch (error) {
@@ -147,7 +143,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Orders routes (YA NO PROTEGIDAS POR isAuthenticated)
-  app.get("/api/orders", async (req: any, res) => { // Eliminado isAuthenticated
+  app.get("/api/orders", async (req: any, res) => {
     try {
       res.status(401).json({ message: "Authentication required for orders" });
     } catch (error) {
@@ -156,7 +152,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/orders", async (req: any, res) => { // Eliminado isAuthenticated
+  app.post("/api/orders", async (req: any, res) => {
     try {
       res.status(401).json({ message: "Authentication required to create order" });
     } catch (error) {
@@ -170,9 +166,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const messageData = insertContactMessageSchema.parse(req.body);
       const message = await storage.createContactMessage(messageData);
-
-      // Here you would typically send an email
-      // For now, we'll just store the message in the database
 
       res.json({ message: "Message sent successfully", id: message.id });
     } catch (error) {
@@ -313,9 +306,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const httpServer = createServer(app);
   return httpServer;
 }
-
-
-
 //desactivo replitAuth.ts
 /*
 
