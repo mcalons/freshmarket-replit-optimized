@@ -7,8 +7,8 @@
   },
   "license": "MIT",
   "scripts": {
-    "dev": "NODE_ENV=development tsx server/index.ts",
-    "build": "vite build && esbuild server/index.ts --bundle --platform=node --target=node20 --format=esm --outfile=dist/server/index.js --external:express --external:@neondatabase/serverless --external:drizzle-orm --external:ws --external:nanoid --external:openid-client --external:passport --external:passport-local --external:memoizee --external:memorystore --external:connect-pg-simple --external:zod --external:zod-validation-error --external:express-session --external:@babel/preset-typescript/package.json --external:lightningcss --external:lightningcss/node/pkg",
+    "dev": "NODE_ENV=development tsx server/index.ts",    
+    "build": "vite build && esbuild server/index.ts --bundle --platform=node --target=node20 --format=esm --outfile=dist/server/index.js --external:express --external:@neondatabase/serverless --external:drizzle-orm --external:ws --external:nanoid --external:openid-client --external:passport --external:passport-local --external:memoizee --external:memorystore --external:connect-pg-simple --external:express-session --external:@babel/preset-typescript/package.json --external:lightningcss --external:lightningcss/node/pkg",
     "start": "NODE_ENV=production node dist/server/index.js",
     "check": "tsc",
     "db:push": "drizzle-kit push"
