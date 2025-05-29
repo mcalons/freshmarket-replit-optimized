@@ -10,11 +10,11 @@ import memoize from "memoizee";
 import connectPg from "connect-pg-simple";
 import { storage } from "./storage.js";
 
-console.log("DEBUG: process.env.MY_REPLIT_DOMAINS:", process.env.MY_REPLIT_DOMAINS);
+console.log("DEBUG: process.env.REPLIT_DOMAINS:", process.env.REPLIT_DOMAINS);
 // Opcional: Para ver todas las variables (¡cuidado con datos sensibles!):
 // console.log("DEBUG: All process.env keys:", Object.keys(process.env));
 
-if (!process.env.MY_REPLIT_DOMAINS) {
+if (!process.env.REPLIT_DOMAINS) {
   throw new Error("Environment variable REPLIT_DOMAINS not provided");
 }
 
