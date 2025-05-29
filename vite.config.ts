@@ -30,7 +30,7 @@ export default defineConfig({
   root: path.resolve(import.meta.dirname, "client"),
   build: {
     outDir: path.resolve(process.cwd(), "client", "dist", "public"),
-    // Asegura compatibilidad con ESM en producción
+    // Asegura compatibilidad con ESM 
     target: "esnext",
   },
 });
