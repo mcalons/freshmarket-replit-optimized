@@ -6,8 +6,9 @@ import {
   insertContactMessageSchema,
   insertCartItemSchema,
 } from "../shared/schema.js";
-//import { z } from "zod";
-import { z } from 'zod/lib/index.js';
+import { z } from "zod";
+
+//import { z } from 'zod/lib/index.js';
 //import { z } from "zod/dist/cjs/index.js";
 
 export async function registerRoutes(app: Express): Promise<Server> {
