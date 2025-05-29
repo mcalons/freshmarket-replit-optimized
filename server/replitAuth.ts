@@ -1,3 +1,5 @@
+//// Autenticación de Replit deshabilitada para despliegue en Vercel
+/*
 import * as client from "openid-client";
 import { Strategy, type VerifyFunction } from "openid-client/passport";
 
@@ -157,3 +159,4 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
     return res.redirect("/api/login");
   }
 };
+*/
