@@ -32,7 +32,6 @@ export default defineConfig({
     outDir: path.resolve(process.cwd(), "client", "dist", "public"),
     // Asegura compatibilidad con ESM en producción
     target: "esnext",
-    minify: "terser",
   },
 });
 
