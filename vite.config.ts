@@ -26,7 +26,6 @@ export default defineConfig({
     },
     // Agrega esto para mejorar compatibilidad con ESM
     extensions: [".js", ".ts", ".tsx", ".json"],
-    modules: ["node_modules"],
   },
   root: path.resolve(import.meta.dirname, "client"),
   build: {
