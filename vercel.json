@@ -3,10 +3,17 @@
   "regions": ["fra1"],
   "builds": [
     {
+      "src": "package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "client/dist/public"
+      }
+    },
+    {
       "src": "server/index.ts",
       "use": "@vercel/node",
       "config": {
-        "includeFiles": ["server/**/*.ts", "shared/**", "package.json", "node_modules/zod/**"],
+        "includeFiles": ["server/**/*.ts", "shared/**"],
         "excludeFiles": [
           "node_modules/@radix-ui/**",
           "node_modules/react/**",
@@ -57,5 +64,5 @@
     }
   ],
   "installCommand": "npm install",
-  "buildCommand": "npm run build"
+  "buildCommand": "npm run build:frontend"
 }
