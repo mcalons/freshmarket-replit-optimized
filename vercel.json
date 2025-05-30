@@ -63,6 +63,6 @@
       "dest": "client/dist/public/index.html"
     }
   ],  
-  "installCommand": "rm -rf node_modules && npm ci",
+  "installCommand": "rm -rf node_modules && npm install rollup@latest --save-dev",
   "buildCommand": "npm run build:frontend"
 }
