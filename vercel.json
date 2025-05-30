@@ -62,7 +62,7 @@
       "src": "/(.*)",
       "dest": "client/dist/public/index.html"
     }
-  ],
-  "installCommand": "npm install",
+  ],  
+  "installCommand": "rm -rf node_modules && rm package-lock.json || true && npm install",
   "buildCommand": "npm run build:frontend"
 }
